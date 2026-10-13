@@ -1,0 +1,379 @@
+{
+  "info": {
+    "_postman_id": "5a8a2e0b-f4f5-4f1e-9008-a1bde52e8d92",
+    "name": "Appointment System API",
+    "description": "Admin + Bot APIs for appointment-system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Actuator Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Employees",
+      "item": [
+        {
+          "name": "Create Employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ahmet Yilmaz\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/employees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "employees"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Employees (activeOnly=true)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/employees?activeOnly=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "activeOnly",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Employees (all)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/employees?activeOnly=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "activeOnly",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Deactivate Employee",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/employees/{{employeeId}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "employees",
+                "{{employeeId}}",
+                "deactivate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Appointments",
+      "item": [
+        {
+          "name": "Create Pending Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": {{employeeId}},\n  \"customerName\": \"Mehmet Demir\",\n  \"customerPhone\": \"+905551112233\",\n  \"startAt\": \"2026-10-16T10:00:00+03:00\",\n  \"endAt\": \"2026-10-16T10:40:00+03:00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "appointments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List All Appointments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "appointments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Appointments By Status (PENDING)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/appointments?status=PENDING",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "appointments"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Appointment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/appointments/{{appointmentId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "appointments",
+                "{{appointmentId}}",
+                "approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject Appointment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/appointments/{{appointmentId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "appointments",
+                "{{appointmentId}}",
+                "reject"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Appointment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/appointments/{{appointmentId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "appointments",
+                "{{appointmentId}}",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bot (Telegram / WhatsApp)",
+      "item": [
+        {
+          "name": "Bot Message - Start",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": \"TELEGRAM\",\n  \"externalUserId\": \"123456789\",\n  \"message\": \"/start\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bot/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bot",
+                "messages"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bot Message - Date (Get Slots)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": \"TELEGRAM\",\n  \"externalUserId\": \"123456789\",\n  \"message\": \"2026-10-16\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bot/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bot",
+                "messages"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bot Message - WhatsApp Date (Get Slots)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": \"WHATSAPP\",\n  \"externalUserId\": \"905551234567\",\n  \"message\": \"2026-10-16\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bot/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bot",
+                "messages"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "employeeId",
+      "value": "1"
+    },
+    {
+      "key": "appointmentId",
+      "value": "1"
+    }
+  ]
+}
