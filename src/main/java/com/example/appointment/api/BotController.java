@@ -22,17 +22,36 @@ public class BotController {
 
     @PostMapping("/messages")
     public BotMessageResponse processMessage(@Valid @RequestBody BotMessageRequest request) {
-        BotConversationService.BotReply reply = botConversationService.handleMessage(
-                request.channel(), request.externalUserId(), request.message());
-        List<BotSlotOptionResponse> slots = reply.slots().stream()
-                .map(slot -> new BotSlotOptionResponse(
-                        slot.optionNo(),
-                        slot.employeeId(),
-                        slot.employeeName(),
-                        slot.startTime(),
-                        slot.endTime()))
+        BotConversationService.BotAction action = parseAction(request.action());
+        BotConversationService.BotReply reply = botConversationService.handleInput(
+                request.channel(),
+                request.externalUserId(),
+                action,
+                request.value(),
+                request.message());
+
+        List<BotOptionResponse> options = reply.options().stream()
+                .map(o -> new BotOptionResponse(
+                        o.type().name(),
+                        o.label(),
+                        o.value()))
                 .toList();
-        return new BotMessageResponse(reply.message(), slots);
+        return new BotMessageResponse(
+                reply.message(),
+                reply.state().name(),
+                options);
+    }
+
+    private BotConversationService.BotAction parseAction(String action) {
+        if (action == null || action.isBlank()) {
+            return null;
+        }
+        try {
+            return BotConversationService.BotAction.valueOf(action);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException(
+                    "Invalid action. Allowed values: START, SELECT_EMPLOYEE, SELECT_DAY, SELECT_SLOT");
+        }
     }
 
     public record BotMessageRequest(
@@ -40,19 +59,20 @@ public class BotController {
             @Pattern(regexp = "TELEGRAM|WHATSAPP", message = "channel must be TELEGRAM or WHATSAPP")
             String channel,
             @NotBlank String externalUserId,
-            @NotBlank String message
+            String action,
+            String value,
+            String message
     ) {}
 
     public record BotMessageResponse(
             String message,
-            List<BotSlotOptionResponse> slots
+            String state,
+            List<BotOptionResponse> options
     ) {}
 
-    public record BotSlotOptionResponse(
-            int optionNo,
-            Long employeeId,
-            String employeeName,
-            String startTime,
-            String endTime
+    public record BotOptionResponse(
+            String type,
+            String label,
+            String value
     ) {}
 }

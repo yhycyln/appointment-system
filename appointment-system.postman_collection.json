@@ -276,7 +276,7 @@
       "name": "Bot (Telegram / WhatsApp)",
       "item": [
         {
-          "name": "Bot Message - Start",
+          "name": "Bot Action - START (Get Employee Buttons)",
           "request": {
             "method": "POST",
             "header": [
@@ -287,7 +287,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"channel\": \"TELEGRAM\",\n  \"externalUserId\": \"123456789\",\n  \"message\": \"/start\"\n}"
+              "raw": "{\n  \"channel\": \"TELEGRAM\",\n  \"externalUserId\": \"123456789\",\n  \"action\": \"START\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/bot/messages",
@@ -304,7 +304,7 @@
           }
         },
         {
-          "name": "Bot Message - Date (Get Slots)",
+          "name": "Bot Action - SELECT_EMPLOYEE (Get Day Buttons)",
           "request": {
             "method": "POST",
             "header": [
@@ -315,7 +315,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"channel\": \"TELEGRAM\",\n  \"externalUserId\": \"123456789\",\n  \"message\": \"2026-10-16\"\n}"
+              "raw": "{\n  \"channel\": \"TELEGRAM\",\n  \"externalUserId\": \"123456789\",\n  \"action\": \"SELECT_EMPLOYEE\",\n  \"value\": \"{{employeeId}}\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/bot/messages",
@@ -332,7 +332,7 @@
           }
         },
         {
-          "name": "Bot Message - WhatsApp Date (Get Slots)",
+          "name": "Bot Action - SELECT_DAY (Get Slot Buttons)",
           "request": {
             "method": "POST",
             "header": [
@@ -343,7 +343,35 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"channel\": \"WHATSAPP\",\n  \"externalUserId\": \"905551234567\",\n  \"message\": \"2026-10-16\"\n}"
+              "raw": "{\n  \"channel\": \"TELEGRAM\",\n  \"externalUserId\": \"123456789\",\n  \"action\": \"SELECT_DAY\",\n  \"value\": \"2026-10-16\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bot/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bot",
+                "messages"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bot Action - SELECT_SLOT (Confirm Selection)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": \"TELEGRAM\",\n  \"externalUserId\": \"123456789\",\n  \"action\": \"SELECT_SLOT\",\n  \"value\": \"{{slotValue}}\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/bot/messages",
@@ -374,6 +402,10 @@
     {
       "key": "appointmentId",
       "value": "1"
+    },
+    {
+      "key": "slotValue",
+      "value": "1|2026-10-16T10:00:00|2026-10-16T10:40:00"
     }
   ]
 }

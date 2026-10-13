@@ -16,6 +16,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AvailabilityService {
@@ -50,63 +51,81 @@ public class AvailabilityService {
             return List.of();
         }
 
-        ZoneId zone = ZoneId.of(bookingProperties.timezone());
-        OffsetDateTime dayStart = date.atStartOfDay(zone).toOffsetDateTime();
-        OffsetDateTime dayEnd = date.plusDays(1).atStartOfDay(zone).toOffsetDateTime();
-        OffsetDateTime now = OffsetDateTime.now(zone);
-
         List<AvailableSlot> availableSlots = new ArrayList<>();
-        short dayOfWeek = (short) date.getDayOfWeek().getValue();
 
         for (Employee employee : employeeRepository.findByActiveTrueOrderByNameAsc()) {
-            List<BreakPeriod> breaks = breakPeriodRepository
-                    .findByEmployeeIdAndDayOfWeekAndActiveTrue(employee.getId(), dayOfWeek);
-            List<SlotCalculator.MinuteRange> breakRanges = breaks.stream()
-                    .map(b -> new SlotCalculator.MinuteRange(b.getStartMinute(), b.getEndMinute()))
-                    .toList();
-
-            List<BlockedPeriod> blocked = blockedPeriodRepository.findOverlappingByEmployeeId(
-                    employee.getId(), dayStart, dayEnd);
-            List<Appointment> reserved = appointmentRepository.findReservedOverlappingAppointments(
-                    employee.getId(), RESERVED_STATUSES, dayStart, dayEnd);
-
-            List<SlotCalculator.Slot> slots = slotCalculator.generate(
-                    date,
-                    DEFAULT_WORK_START_MINUTE,
-                    DEFAULT_WORK_END_MINUTE,
-                    breakRanges,
-                    bookingProperties.slotDurationMinutes());
-
-            for (SlotCalculator.Slot slot : slots) {
-                OffsetDateTime slotStart = slot.start().atZone(zone).toOffsetDateTime();
-                OffsetDateTime slotEnd = slot.end().atZone(zone).toOffsetDateTime();
-                if (slotStart.isBefore(now)) {
-                    continue;
-                }
-
-                boolean conflictsBlocked = blocked.stream()
-                        .anyMatch(b -> overlaps(slotStart, slotEnd, b.getStartAt(), b.getEndAt()));
-                if (conflictsBlocked) {
-                    continue;
-                }
-
-                boolean conflictsAppointment = reserved.stream()
-                        .anyMatch(a -> overlaps(slotStart, slotEnd, a.getStartAt(), a.getEndAt()));
-                if (conflictsAppointment) {
-                    continue;
-                }
-
-                availableSlots.add(new AvailableSlot(
-                        employee.getId(),
-                        employee.getName(),
-                        slot.start(),
-                        slot.end()));
-            }
+            availableSlots.addAll(calculateEmployeeSlots(employee, date));
         }
 
         availableSlots.sort(Comparator
                 .comparing(AvailableSlot::startAt)
                 .thenComparing(AvailableSlot::employeeName));
+        return availableSlots;
+    }
+
+    public List<AvailableSlot> getAvailableSlotsForEmployee(Long employeeId, LocalDate date) {
+        if (date.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            return List.of();
+        }
+        Optional<Employee> employeeOptional = employeeRepository.findById(employeeId)
+                .filter(Employee::isActive);
+        if (employeeOptional.isEmpty()) {
+            return List.of();
+        }
+        return calculateEmployeeSlots(employeeOptional.get(), date);
+    }
+
+    private List<AvailableSlot> calculateEmployeeSlots(Employee employee, LocalDate date) {
+        ZoneId zone = ZoneId.of(bookingProperties.timezone());
+        OffsetDateTime dayStart = date.atStartOfDay(zone).toOffsetDateTime();
+        OffsetDateTime dayEnd = date.plusDays(1).atStartOfDay(zone).toOffsetDateTime();
+        OffsetDateTime now = OffsetDateTime.now(zone);
+        short dayOfWeek = (short) date.getDayOfWeek().getValue();
+
+        List<BreakPeriod> breaks = breakPeriodRepository
+                .findByEmployeeIdAndDayOfWeekAndActiveTrue(employee.getId(), dayOfWeek);
+        List<SlotCalculator.MinuteRange> breakRanges = breaks.stream()
+                .map(b -> new SlotCalculator.MinuteRange(b.getStartMinute(), b.getEndMinute()))
+                .toList();
+
+        List<BlockedPeriod> blocked = blockedPeriodRepository.findOverlappingByEmployeeId(
+                employee.getId(), dayStart, dayEnd);
+        List<Appointment> reserved = appointmentRepository.findReservedOverlappingAppointments(
+                employee.getId(), RESERVED_STATUSES, dayStart, dayEnd);
+
+        List<SlotCalculator.Slot> slots = slotCalculator.generate(
+                date,
+                DEFAULT_WORK_START_MINUTE,
+                DEFAULT_WORK_END_MINUTE,
+                breakRanges,
+                bookingProperties.slotDurationMinutes());
+
+        List<AvailableSlot> availableSlots = new ArrayList<>();
+        for (SlotCalculator.Slot slot : slots) {
+            OffsetDateTime slotStart = slot.start().atZone(zone).toOffsetDateTime();
+            OffsetDateTime slotEnd = slot.end().atZone(zone).toOffsetDateTime();
+            if (slotStart.isBefore(now)) {
+                continue;
+            }
+
+            boolean conflictsBlocked = blocked.stream()
+                    .anyMatch(b -> overlaps(slotStart, slotEnd, b.getStartAt(), b.getEndAt()));
+            if (conflictsBlocked) {
+                continue;
+            }
+
+            boolean conflictsAppointment = reserved.stream()
+                    .anyMatch(a -> overlaps(slotStart, slotEnd, a.getStartAt(), a.getEndAt()));
+            if (conflictsAppointment) {
+                continue;
+            }
+
+            availableSlots.add(new AvailableSlot(
+                    employee.getId(),
+                    employee.getName(),
+                    slot.start(),
+                    slot.end()));
+        }
         return availableSlots;
     }
 

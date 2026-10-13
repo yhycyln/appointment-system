@@ -69,7 +69,7 @@ Appointments are created as `PENDING` and must be approved by an employee/admin 
 - `POST /api/v1/admin/appointments/{id}/approve` — approve pending appointment
 - `POST /api/v1/admin/appointments/{id}/reject` — reject pending appointment
 - `POST /api/v1/admin/appointments/{id}/cancel` — cancel pending or confirmed appointment
-- `POST /api/v1/bot/messages` — process first-step Telegram/WhatsApp bot conversation (ask date, return selectable slots)
+- `POST /api/v1/bot/messages` — process Telegram/WhatsApp bot conversation with button-driven actions (employee -> day -> slot)
 
 Bot slot policy:
 - Sunday: no slots
@@ -110,13 +110,35 @@ Example create appointment:
 }
 ```
 
-Example bot message:
+Example bot start request:
 
 ```json
 {
   "channel": "TELEGRAM",
   "externalUserId": "123456789",
-  "message": "2026-10-15"
+  "action": "START"
+}
+```
+
+Example bot employee selection request:
+
+```json
+{
+  "channel": "TELEGRAM",
+  "externalUserId": "123456789",
+  "action": "SELECT_EMPLOYEE",
+  "value": "1"
+}
+```
+
+Example bot day selection request:
+
+```json
+{
+  "channel": "TELEGRAM",
+  "externalUserId": "123456789",
+  "action": "SELECT_DAY",
+  "value": "2026-10-15"
 }
 ```
 

@@ -20,6 +20,9 @@ public class TelegramSession {
     @Column(nullable = false, length = 40)
     private String state = BotSessionState.START.name();
 
+    @Column(nullable = false, columnDefinition = "jsonb")
+    private String context = "{}";
+
     protected TelegramSession() {}
 
     public TelegramSession(String telegramUserId) {
@@ -29,6 +32,7 @@ public class TelegramSession {
     public Long getId() { return id; }
     public String getTelegramUserId() { return telegramUserId; }
     public String getState() { return state; }
+    public String getContext() { return context; }
     public BotSessionState getSessionState() {
         try {
             return BotSessionState.valueOf(state);
@@ -39,5 +43,9 @@ public class TelegramSession {
 
     public void setSessionState(BotSessionState state) {
         this.state = state.name();
+    }
+
+    public void setContext(String context) {
+        this.context = context;
     }
 }

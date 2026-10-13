@@ -2,5 +2,7 @@ package com.example.appointment.bot;
 
 public enum BotSessionState {
     START,
-    AWAITING_DATE
+    AWAITING_EMPLOYEE_SELECTION,
+    AWAITING_DAY_SELECTION,
+    AWAITING_SLOT_SELECTION
 }
