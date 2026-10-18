@@ -50,7 +50,7 @@ public class BotController {
             return BotConversationService.BotAction.valueOf(action);
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(
-                    "Invalid action. Allowed values: START, SELECT_EMPLOYEE, SELECT_DAY, SELECT_SLOT");
+                    "Invalid action. Allowed values: START, SELECT_EMPLOYEE, SELECT_DAY, SELECT_SLOT, PROVIDE_CUSTOMER_NAME");
         }
     }
 

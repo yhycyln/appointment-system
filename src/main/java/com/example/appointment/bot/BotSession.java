@@ -8,14 +8,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "telegram_sessions")
-public class TelegramSession {
+@Table(name = "bot_sessions")
+public class BotSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "telegram_user_id", nullable = false, unique = true, length = 128)
-    private String telegramUserId;
+    @Column(name = "external_user_id", nullable = false, unique = true, length = 160)
+    private String externalUserId;
 
     @Column(nullable = false, length = 40)
     private String state = BotSessionState.START.name();
@@ -23,16 +23,14 @@ public class TelegramSession {
     @Column(nullable = false, columnDefinition = "jsonb")
     private String context = "{}";
 
-    protected TelegramSession() {}
+    protected BotSession() {}
 
-    public TelegramSession(String telegramUserId) {
-        this.telegramUserId = telegramUserId;
+    public BotSession(String externalUserId) {
+        this.externalUserId = externalUserId;
     }
 
-    public Long getId() { return id; }
-    public String getTelegramUserId() { return telegramUserId; }
-    public String getState() { return state; }
     public String getContext() { return context; }
+
     public BotSessionState getSessionState() {
         try {
             return BotSessionState.valueOf(state);
@@ -41,11 +39,6 @@ public class TelegramSession {
         }
     }
 
-    public void setSessionState(BotSessionState state) {
-        this.state = state.name();
-    }
-
-    public void setContext(String context) {
-        this.context = context;
-    }
+    public void setSessionState(BotSessionState state) { this.state = state.name(); }
+    public void setContext(String context) { this.context = context; }
 }

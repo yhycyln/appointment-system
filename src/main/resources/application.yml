@@ -34,5 +34,9 @@ app:
     slot-duration-minutes: 40
     booking-horizon-days: 7
     timezone: Europe/Istanbul
-  telegram:
-    bot-token: ${TELEGRAM_BOT_TOKEN}
+  whatsapp:
+    access-token: ${WHATSAPP_ACCESS_TOKEN:}
+    phone-number-id: ${WHATSAPP_PHONE_NUMBER_ID:}
+    verify-token: ${WHATSAPP_VERIFY_TOKEN:}
+    app-secret: ${WHATSAPP_APP_SECRET:}
+    graph-api-version: ${WHATSAPP_GRAPH_API_VERSION:v23.0}

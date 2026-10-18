@@ -1,0 +1,7 @@
+CREATE TABLE bot_sessions (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    external_user_id VARCHAR(160) NOT NULL UNIQUE,
+    state VARCHAR(40) NOT NULL DEFAULT 'START',
+    context JSONB NOT NULL DEFAULT '{}'::jsonb,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

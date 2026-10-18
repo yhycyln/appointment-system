@@ -18,7 +18,7 @@ Appointments are created as `PENDING` and must be approved by an employee/admin 
 - Docker Desktop or Docker Engine
 
 ## Run with Docker (recommended)
-1. Configure `.env` values (`POSTGRES_PASSWORD`, `TELEGRAM_BOT_TOKEN`, and related fields).
+1. Configure `.env` values (`POSTGRES_PASSWORD` and the WhatsApp values).
 2. Build and start the full stack:
 
    ```bash
@@ -69,9 +69,29 @@ Appointments are created as `PENDING` and must be approved by an employee/admin 
 - `POST /api/v1/admin/appointments/{id}/approve` — approve pending appointment
 - `POST /api/v1/admin/appointments/{id}/reject` — reject pending appointment
 - `POST /api/v1/admin/appointments/{id}/cancel` — cancel pending or confirmed appointment
-- `POST /api/v1/bot/messages` — process Telegram/WhatsApp bot conversation with button-driven actions (employee -> day -> slot)
+- `POST /api/v1/bot/messages` — process WhatsApp bot conversation with button-driven actions (employee -> day -> slot)
+- `GET /webhooks/whatsapp` — verify the Meta webhook subscription
+- `POST /webhooks/whatsapp` — receive WhatsApp messages and reply through the Cloud API
 
-Bot slot policy:
+## WhatsApp Cloud API setup
+
+The WhatsApp webhook uses Meta's Cloud API. Add these values to the ignored local `.env` file or your deployment secret store:
+
+```dotenv
+WHATSAPP_ACCESS_TOKEN=your_access_token
+WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id
+WHATSAPP_VERIFY_TOKEN=your_private_webhook_verify_token
+WHATSAPP_APP_SECRET=your_meta_app_secret
+WHATSAPP_GRAPH_API_VERSION=v23.0
+```
+
+Use the access token and phone number ID from the WhatsApp API Setup page. The verify token is a secret string you choose; enter the same value in Meta's webhook configuration. `WHATSAPP_APP_SECRET` is the App Secret from the Meta app settings and is used to validate `X-Hub-Signature-256` on incoming events. Keep the access token, verify token, and app secret private, and rotate temporary access tokens before production. `WHATSAPP_GRAPH_API_VERSION` can be changed to a Graph API version supported by your Meta app.
+
+In the Meta app, configure the callback URL as `https://<public-host>/webhooks/whatsapp`, use the verify token above, and subscribe the WhatsApp Business Account to the `messages` webhook field. The callback must be reachable from Meta over HTTPS. For local development, expose the app through a trusted HTTPS tunnel and use that temporary public URL as the callback.
+
+Customers start the conversation by messaging the business number. The bot replies with WhatsApp interactive list choices for employees, days, and available times. Lists include cancel/restart and page controls when needed; the name step accepts text and includes a cancel button. After the customer provides their name, the bot creates a `PENDING` appointment that still needs employee/admin approval. Incoming WhatsApp message IDs are recorded to avoid processing webhook retries twice. This implementation replies to inbound messages and does not send outbound template notifications.
+
+## Bot slot policy
 - Sunday: no slots
 - Monday-Saturday: slots can be generated between 10:00 and 24:00
 
@@ -146,6 +166,6 @@ Example bot day selection request:
 - The management endpoints are **not authenticated yet**. Do not expose them to the internet before adding authentication/authorization.
 - The appointment creation endpoint is a bootstrap/admin endpoint, not the final public booking flow.
 - Employee approval is represented as an authenticated admin action for now; assigning approvals to each employee is a next step.
-- Telegram bot transport, persistent Telegram conversation state, customer/channel account linking, and notifications are not wired up yet.
+- Telegram and WhatsApp booking flows are wired up; customer/channel account linking and outbound notification messages are not included.
 - Availability logic is a starter and must be completed with working hours, multiple breaks, blocked periods, existing appointments, 7-day horizon, and concurrent booking tests.
 - Configure strong secrets, TLS, backups, rate limiting, and privacy/retention controls before production use.
